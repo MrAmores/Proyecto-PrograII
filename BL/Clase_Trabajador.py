@@ -6,7 +6,7 @@ class Trabajador(Persona):
         super().__init__(identificacion, nombre, apellido1, apellido2, fechaNacimiento, genero, activo)
         self.idRol=idRol
     
-    def registrar(self):
+    def capturaDatos(self):
          # Validación de identificación
         while True:
             self.identificacion = input("Digite el número de identificación del trabajador: ").strip()
@@ -56,14 +56,8 @@ class Trabajador(Persona):
                 print("Opción no válida. Ingrese 'F' para Femenino o 'M' para Masculino.")
         #Valida que sea un dato entero        
         # NOTA: SE BEDE AGREGAR LA LOGICA PARA AGREGAR EL ID ROL
-        objTrabajador = Trabajador(self.identificacion, 
-        self.nombre, 
-        self.apellido1, 
-        self.apellido2, 
-        self.fechaNacimiento, 
-        self.genero, 
-        activo=True, 
-        idRol=self.idRol)
+        objTrabajador = Trabajador(self.identificacion, self.nombre, self.apellido1, self.apellido2,
+                                   self.fechaNacimiento, self.genero, activo=True, idRol=self.idRol)
 
     def modificar(self):
         pass

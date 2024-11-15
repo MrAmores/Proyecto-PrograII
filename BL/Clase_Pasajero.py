@@ -1,17 +1,21 @@
-from Clase_Persona import Persona
-import re #Esta biblioteca funciona para realizar validación de atributos
+from BL.Clase_Persona import Persona
+from BL.Clase_Cabina import Cabina 
+from DB_CONFIG.conexion import conexionDB
 
 class Pasajero(Persona):
-    def __init__(self, identificacion, nombre, apellido1, apellido2, fechaNacimiento, genero, activo, idCabina, cantidadPasajeros):
-        super().__init__(self, identificacion, nombre, apellido1, apellido2, fechaNacimiento, genero, activo)
+    conexion = conexionDB()
+    miconexion = conexion.cursor()
+    
+    def __init__(self, identificacion, nombre, apellido1, apellido2, fechaNacimiento, genero, activo, idCabina):
+        super().__init__(identificacion, nombre, apellido1, apellido2, fechaNacimiento, genero, activo)
         self.idCabina = idCabina
-        self.cantidadPasajeros = cantidadPasajeros
-        
-    def registrar(self):
+                 
+    def capturaDatos(self):
          # Validation of identification
         while True:
             self.identificacion = input("Digite el número de identificación del pasajero: ").strip()
             if self.identificacion:
+                self.activo = True
                 break
             else:
                 print("El número de identificación no puede estar vacío o contener solo espacios.")
@@ -36,13 +40,18 @@ class Pasajero(Persona):
                 break
             else:
                 print("El segundo apellido no puede estar vacío o contener solo espacios.")
+                
         # Validation of date of birth in yyyy-MM-dd format
         while True:
-            self.fechaNacimiento = input("Digite la fecha de nacimiento del pasajero (yyyy-MM-dd): ").strip()
-            if re.match(r"^\d{4}-\d{2}-\d{2}$", self.fechaNacimiento):
-                break
-            else:
-                print("Formato de fecha no válido. Use el formato yyyy-MM-dd.")
+            try:
+                anhoNacimiento = int(input("Digite el año de nacimiento del pasajero: ").strip())
+                if anhoNacimiento > 0:
+                    self.fechaNacimiento = anhoNacimiento
+                    break
+                else:
+                    print("El año de nacimiento debe de ser una numero positivo.")
+            except ValueError:
+                print("Entrada inválida. Por favor, ingrese un número entero.")     
         # Gender validation
         while True:
             gen = input("""
@@ -50,37 +59,72 @@ class Pasajero(Persona):
             F - Femenino
             M - Masculino
             """).strip().upper()
-            if gen in ["F", "M"]:
-                self.genero = gen
+            if gen == "F":
+                self.genero = "Femenino"
                 break
+            elif gen == "M":
+                self.genero = "Masculino"
             else:
                 print("Opción no válida. Ingrese 'F' para Femenino o 'M' para Masculino.")
-      #Validate that it is an integer data        
+                
         while True:
             try:
-                cantidad_personas = int(input("Digite la cantidad de personas: ").strip())
-                if cantidad_personas > 0:
-                    self.cantidadPasajeros = cantidad_personas
-                    break
+                cantidad_pasajeros = int(input("Digite la cantidad de acompañantes que vienen con usted: "))
+                if cantidad_pasajeros > 0:
+                    print("No se permite ingresar números negativos.")
                 else:
-                    print("La cantidad de personas debe ser un número entero positivo.")
+                    Cabina.obtener_cabinas_disponibles(cantidad_pasajeros)
+                    while True:
+                        try:
+                            cabina = int(input("Selecione el id de la cabina: ").strip())
+                            if cabina > 0:
+                                self.idCabina = cabina
+                                break
+                            else:
+                                print("Entrada inválida. Por favor, ingrese un número entero.")
+                        except ValueError:
+                            print("Entrada inválida. Por favor, ingrese un número entero.")           
             except ValueError:
-                print("Entrada inválida. Por favor, ingrese un número entero.")
-        objPasajero = Pasajero(self.identificacion, 
-                               self.nombre, 
-                               self.apellido1, 
-                               self.apellido2, 
-                               self.fechaNacimiento, 
-                               self.genero, 
-                               activo=True, 
-                               idCabina=None, 
-                               cantidadPasajeros=self.cantidadPasajeros)                
-                
-    def modificar(self):
-        pass
+                print("Entrada inválida. Por favor, ingrese un número entero.")           
+                              
+    def modificar(self, nombre, apell_1, apell_2, anho_nacimiento, genero, id):
+         # Consulta SQL de modificación
+        modificar = ("update pasajero set nombre = %s, "
+                     "apell_1 = %s, "
+                     "apell_2 = %s,"
+                     "anho_nacimiento = %s,"
+                     "genero = %s,"
+                     "where idPasajero = %s")
+        datos = (nombre, apell_1, apell_2, anho_nacimiento, genero, id)
+        # Ejecutar la consulta y modificar datos
+        Pasajero.miconexion.execute(modificar, datos)
+        Pasajero.conexion.commit()
+        print("Se han modificado los datos del pasajero exitosamente.")
     
     def listar(self):
-        pass
+        print("Listado de pasajeros en el sistema:")
+        # Ejecutar la consulta y listar datos
+        Pasajero.miconexion.execute("select * from pasajero")
+        datos = Pasajero.miconexion.fetchall()
+        for i in datos:
+            print(i)
     
-    def desactivar(self):
-        pass 
+    def desactivar(self, id):
+        modificar = "UPDATE pasajero SET activo = %s WHERE idRol = %s"
+        datos = (False, id)
+        # Ejecutar la consulta y inactivar datos
+        Pasajero.miconexion.execute(modificar, datos)
+        Pasajero.conexion.commit()
+        print("Se ha borrado el pasajero exitosamente.")
+    
+    def ingresaPasajero(self):
+        # Consulta SQL de inserción
+        ingreso = "INSERT INTO pasajero (idPasajero, nombre, apell_1, apell_2, anho_nacimiento, genero, activo, idCabina) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+        datos = (self.identificacion, self.nombre, self.apellido1, self.apellido2, self.fechaNacimiento,self.genero,self.activo,self.idCabina)
+        # Ejecutar la consulta e ingresar datos
+        Pasajero.miconexion.execute(ingreso, datos)
+        Pasajero.conexion.commit()
+        print("Se ha ingresado al pasajero exitosamente.")       
+    
+    
+

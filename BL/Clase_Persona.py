@@ -10,16 +10,16 @@ class Persona(ABC):
         self.activo = activo
         
     @abstractmethod
-    def registrar(self):
+    def capturaDatos(self):
         pass
     @abstractmethod
-    def modificar(self):
+    def modificar(self, nombre, apell_1, apell_2, anho_nacimiento, genero, id):
         pass
     @abstractmethod
     def listar(self):
         pass
     @abstractmethod
-    def desactivar(self):
+    def desactivar(self, id):
         pass
 
         

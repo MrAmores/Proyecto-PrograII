@@ -1,3 +1,4 @@
+from BL.Clase_Roles import Rol
 def mostrar_menu_rol():
     while True:
         print("""

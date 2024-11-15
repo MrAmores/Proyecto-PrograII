@@ -4,6 +4,7 @@ from CLI.Cabina_cli import mostrar_menu_cabina
 from CLI.Rol_cli import mostrar_menu_rol
 from CLI.Servicio_cli import mostrar_menu_servicio
 from CLI.Solicitud_cli import mostrar_menu_solicitud_servicio
+
 def mostrar_menu_principal():
     opc = 0
     while True:

@@ -1,5 +1,6 @@
-
+from BL.Clase_Pasajero import Pasajero
 def mostrar_menu_pasajero():
+    objPasajero = Pasajero(identificacion=None, nombre=None, apellido1=None, apellido2=None, fechaNacimiento=None, genero=None, activo=None, idCabina=None)
     while True:
         print("""
         ------------------------------
@@ -16,7 +17,8 @@ def mostrar_menu_pasajero():
             opcion = int(input("Selecione una opción: ")) 
             
             if opcion == 1:
-                pass  
+                objPasajero.capturaDatos()
+                objPasajero.ingresaPasajero()
             elif opcion == 2:
                 pass
                 # modificar()
